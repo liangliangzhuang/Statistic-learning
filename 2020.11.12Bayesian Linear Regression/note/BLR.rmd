@@ -1,0 +1,523 @@
+---
+title: "Bayesian Linear Regression"
+subtitle: "-- US air pollution data"
+author:
+  - 庄亮亮
+documentclass: ctexart
+output:
+  rticles::ctex:
+    fig_caption: yes
+    number_sections: no
+    toc: yes
+classoption: "hyperref,"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+options(tinytex.verbose = TRUE, message=FALSE, warning=FALSE)
+```
+
+```{r message=FALSE, warning=FALSE,results='hide'}
+#devtools::install_github("julianfaraway/brinla") #可能要翻墙
+library(INLA)
+library(brinla)
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(MASS)
+library(nlme)
+```
+
+# 1. Bayesian inference for linear regression
+
+
+**空气污染数据**：调查美国41个城市污染的决定因素。以`SO2`作为因变量，其他六个变量作为潜在解释变量。
+
+在这些潜在解释变量中，有两个与人类生态相关`(pop,manuf)`，另外四个与气候相关`(negtemp,wind,precip,days)`。变量`negtemp`表示年平均气温的负值。在这里使用负值是因为所有的变量都是这样的，高的值表示一个不太事宜的环境。
+
+```{r}
+data(usair, package = "brinla")
+knitr::kable(head(usair), 
+             caption = 'usair数据', 
+             align='c')
+```
+
+
+```{r}
+pairs.chart <- ggpairs(usair[,-1], 
+	lower = list(continuous = "cor"), 
+	upper = list(continuous = "points", combo = "dot")) +
+	ggplot2::theme(axis.text = element_text(size = 6)) 
+pairs.chart  
+```
+
+`Manuf`与`Pop`高度相关:`r=0.955`；我们在模型中只需保留一个。
+
+## 1.1 Frequentist approach
+
+```{r}
+usair.formula1 <-  SO2 ~ negtemp + manuf + wind + precip + days
+usair.lm1 <- lm(usair.formula1, data = usair)
+knitr::kable(round(coef(summary(usair.lm1)), 4), 
+             caption = '拟合情况汇总', 
+             align='c')
+```
+
+结果表明，`negtemp`和`manuf`是重要的解释变量，而`wind`,`precip`和`days`不是。
+
+- 标准残差
+```{r}
+round(summary(usair.lm1)$sigma, 4)
+```
+
+## 1.2 Bayesian Regression with INLA 
+
+默认情况下：
+\begin{equation*}
+\beta_{j} \sim N\left(0,10^{6}\right), \quad j=0, \ldots, p
+\end{equation*}
+
+\begin{equation*}
+\log (\tau) \sim \log \operatorname{Gamma}\left(1,10^{-5}\right)
+\end{equation*}
+
+
+```{r}
+usair.inla1 <- inla(usair.formula1, data = usair,
+	control.compute = list(dic = TRUE, cpo = TRUE))
+```
+
+
+```{r}
+
+knitr::kable(round(usair.inla1$summary.fixed, 4), 
+             caption = '固定效应信息', 
+             align='c')
+knitr::kable(round(usair.inla1$summary.hyperpar, 4), 
+             caption = '超参数信息', 
+             align='c')
+```
+
+```{r}
+summary(usair.inla1)
+```
+
+
+- 计算$\sigma$的后验估计值
+
+默认情况下，inla对象输出的是后验信息的精确参数$\tau$。然而常常我们对后验均值$\sigma$感兴趣。
+
+`bri.hyperpar.summary`用于生成超参数$\sigma$的汇总统计信息。
+
+```{r}
+knitr::kable(round(bri.hyperpar.summary(usair.inla1), 4), 
+             caption = '超参数信息', 
+             align='c')
+```
+
+
+- 绘制$\sigma$的后验密度
+
+使用函数`bri.hyperpar.plot`。
+```{r}
+bri.hyperpar.plot(usair.inla1)
+```
+
+$\sigma$有略微右偏的后验分布。
+
+- 改变先验
+
+假设 $\beta_0 \sim N(100,100)$,
+$\beta_{negtemp} \sim N(2,1)$ 和 $\beta_{wind} \sim N(−3,1)$。
+
+如果想假设$\tau$服从对数正态分布(对数$\tau$服从正态分布)，可以使用选项`control.family`来指定。
+
+```{r}
+usair.inla2 <- inla(usair.formula1, data = usair, control.compute = list(dic = TRUE, cpo =TRUE),
+	control.fixed = list(mean.intercept = 100, prec.intercept = 10^(-2), 
+		mean = list(negtemp = 2, wind = -3, default =0), prec = 1), 
+	control.family = list(hyper = list(prec = list(prior="gaussian", param =c(0,1)))))
+summary(usair.inla2)
+```
+
+---------------
+
+
+# 2. Prediction
+
+## 2.1  The prediction in lm
+
+```{r}
+# new observations
+new.data <- data.frame(
+  negtemp = c(-50, -60, -40),
+  manuf = c(150, 100, 400), 
+  pop = c(200, 100, 300), 
+  wind = c(6, 7, 8), 
+  precip = c(10, 30, 20), 
+  days = c(20, 100, 40))
+knitr::kable(head(new.data))
+predict(usair.lm1, new.data, se.fit = TRUE)
+```
+
+输出：`预测向量(\$fit)`、`预测均值的标准误差向量(\$se.fit)`、`残差的自由度(\$df)`和`残差标准差($residual.scale)`。
+
+##  2.2 The prediction in INLA
+
+在INLA中，与lm的函数预测不同。预测可以作为模型拟合的一部分。由于预测和拟合一个有缺失数据的模型是一样的，我们需要设置响应变量`“y[i]=NA”`表示我们想要预测的值。
+
+```{r}
+usair.combined <- rbind(usair, data.frame(SO2 = c(NA, NA, NA), new.data))
+knitr::kable(tail(usair.combined))
+```
+
+```{r}
+usair.link <- c(rep(NA, nrow(usair)), rep(1, nrow(new.data)))
+tail(usair.link)
+```
+
+```{r}
+usair.inla1.pred <- inla(usair.formula1, data = usair.combined, control.predictor = list(link = usair.link))
+
+knitr::kable(usair.inla1.pred$summary.fitted.values[(nrow(usair)+1):nrow(usair.combined),],
+	caption = '拟合情况', align='c')
+```
+
+---------------
+
+# 3. Model selection and checking
+
+## 3.1 DIC
+
+- AIC
+```{r}
+usair.step <- stepAIC(usair.lm1, trace = FALSE)
+usair.step$anova
+# Final multiple regression model
+usair.formula2 <- SO2 ~ negtemp + manuf + wind + precip
+usair.lm2 <- lm(usair.formula2, data = usair)
+knitr::kable(round(coef(summary(usair.lm2)), 4))
+```
+
+- DIC
+
+在贝叶斯分析中，DIC是AIC的推广，是最常用的贝叶斯模型比较方法之一，定义为拟合优度度量和模型复杂度度量的总和
+```{r}
+usair.inla3 <- inla(usair.formula2, data = usair, control.compute = list(dic = TRUE, cpo = TRUE))
+c(usair.inla1$dic$dic, usair.inla3$dic$dic)
+```
+最佳模型：所有子集回归中最小的DIC。
+
+
+## 3.2 Posterior Predictive Checking
+ 
+在贝叶斯分析中，模型评估通常是
+
+1. 基于后验预测检查；
+
+2. 留一交叉验证预测检查。
+
+### 3.2.1 基于后验预测检查
+
+后验预测p值可以通过R函数`INLA .pmarginal`得到
+```{r}
+usair.inla3.pred <- inla(usair.formula2, data = usair, control.predictor = list(link = 1, compute = TRUE))
+post.predicted.pval <- vector(mode = "numeric", length = nrow(usair))
+for(i in (1:nrow(usair))) {
+  post.predicted.pval[i] <- inla.pmarginal(q=usair$SO2[i],
+  	marginal = usair.inla3.pred$marginals.fitted.values[[i]])
+}
+hist(post.predicted.pval, main="", breaks = 10, xlab="Posterior predictive p-value")
+```
+
+很多后验预测p值都接近于0或1。然而，解释后验预测p值的一个**缺点**是，即使数据来自真实的模型，它们也不能具有均匀分布。
+因此，后验预测p值的图并不令人满意，我们希望使用其他模型评估方法进一步检验该模型。
+
+### 3.2.2 留一交叉验证预测检查
+
+评价模型的优劣的两个量：
+
+1. conditional predictive ordinate (CPO)
+
+$$
+	CPO_{i} =p\left(y_{i} \mid y_{-i}\right) 
+$$
+	
+2. probability integral transform (PIT)
+
+$$
+	\mathrm{PIT}_{i} =p\left(y_{i}^{*} \leq y_{i} \mid \mathbf{y}_{-i}\right)
+$$
+	
+	
+在INLA中有针对潜在问题的内部检查，这些问题出现在`usair.inla3$cpo$failure`中。它是一个向量，每个观测值都包含0或1。当值为1时，表示CPO或PIT的估计对于相应的观测是不可靠的。在我们的例子中，我们可以通过以下方法检查是否存在故障：
+	
+```{r}
+sum(usair.inla3$cpo$failure)
+```
+
+因此，在`usair.inla3`中不存在CPOs和PITs的计算问题。
+
+```{r}
+par(mfrow = c(1, 2))
+hist(usair.inla3$cpo$pit, main="", breaks = 10, xlab = "PIT")
+qqplot(qunif(ppoints(length(usair.inla3$cpo$pit))), usair.inla3$cpo$pit, main = "Q-Q plot for Unif(0,1)", 
+	xlab = "Theoretical Quantiles", ylab = "Sample Quantiles")
+qqline(usair.inla3$cpo$pit, distribution = function(p) qunif(p), prob = c(0.1, 0.9))
+```
+
+PITs的分布接近均匀分布，表明模型对数据的拟合较为合理。值得注意的是，PITs直方图比对应的后验预测直方图更接近均匀分布。
+
+- Compare LPML for the full model and reduce model
+
+如果我们把所有$CPO$值的乘积看作一个“伪边际似然”，这就给出了一个交叉验证的拟合度度量。Geisser和Eddy(1979)提出的对数拟边际似然($LPML$)：
+$$
+L P M L=\log \left\{\prod_{i=1}^{n} p\left(y_{i} \mid \mathbf{y}_{-i}\right)\right\}=\sum_{i=1}^{n} \log p\left(y_{i} \mid \mathbf{y}_{-i}\right)=\sum_{i=1}^{n} \log \mathrm{CPO}_{i}
+$$
+
+
+
+
+```{r}
+LPML1 <- sum(log(usair.inla1$cpo$cpo))
+LPML3 <- sum(log(usair.inla3$cpo$cpo))
+c(LPML1, LPML3)
+```
+简化模型的LPML比完整模型的LPML大，这表明简化模型是首选的。
+
+ - CPOs的逐点比较
+
+```{r}
+par(mfrow=c(1,1))
+plot(usair.inla1$cpo$cpo, usair.inla3$cpo$cpo, 
+	xlab="CPO for the full model", ylab="CPO for the reduced model")
+abline(0,1)
+```
+
+CPO值表明模型拟合较好，参考线以上的点的优势意味着对简化模型的偏好。这与我们之前使用DIC和LPML标准的研究结果一致。
+
+
+## 3.4 Bayesian residual plots
+
+使用`bri.lmresid.plot`生成贝叶斯残差图:
+
+```{r}
+par(mfrow=c(1,2))
+bri.lmresid.plot(usair.inla3)
+bri.lmresid.plot(usair.inla3, usair$negtemp, 
+	xlab = "negtemp", smooth =TRUE)
+```
+
+贝叶斯残差一般都在零附近呈现随机模式。但我们发现观测数31似乎是一个离群值，其贝叶斯残差高达59.6927。
+
+---------------
+
+# 4. Robust Linear regression with t-distribution
+
+在INLA中，通过指定`family="T"`来实现。
+
+```{r}
+## Usair data example
+usair.inla4 <- inla(usair.formula2, family = "T", data = usair, 
+	control.compute = list(dic = TRUE, cpo = TRUE))
+# summary(usair.inla4)
+
+knitr::kable(round(usair.inla4$summary.fixed, 4),
+	caption = '固定效应情况', align='c')
+
+knitr::kable(round(usair.inla4$summary.hyperpar, 4), 
+caption = '
+	超参数情况', align='c')
+```
+
+
+# 5. Analysis of Variance
+
+下面的例子，我们将只关注**固定效应**的方差分析模型。关于随机效应模型，将在第5章详细介绍。
+
+来自一项研究可待因和针灸对男性患者术后牙痛的影响的实验(Kutner等，2004年)。
+
+该研究采用随机区组设计，在一个因子结构中出现两个治疗因素。两种治疗因素都有两个层次。
+
+反应变量缓解是疼痛缓解评分(分数越高，患者缓解程度越好)。根据对疼痛耐受性的评估，32名受试者被分配到8个区块，每个区块4名受试者。
+
+
+
+```{r}
+# PainRelief data
+data(painrelief, package = "brinla")
+
+painrelief$PainLevel <- as.factor(painrelief$PainLevel)
+painrelief$Codeine <- as.factor(painrelief$Codeine)
+painrelief$Acupuncture <- as.factor(painrelief$Acupuncture)
+
+knitr::kable(head(painrelief), 
+caption = 'painrelief数据', align='c')
+```
+
+```{r}
+painrelief.inla <- inla(Relief ~ PainLevel + Codeine*Acupuncture, data = painrelief)
+#summary(painrelief.inla)
+knitr::kable(round(painrelief.inla$summary.fixed, 4))
+```
+
+治疗因素可待因和针灸的主要作用在贝叶斯意义上都是高度显著的。但在95%可信水平上，两者之间的交互作用不显著，说明两者之间不存在交互作用。
+
+```{r}
+est1 <- data.frame(x =c("2", "3", "4", "5", "6", "7", "8"),
+	       Estimate=painrelief.inla$summary.fixed[c(2:8),1],
+	       L = painrelief.inla$summary.fixed[c(2:8),3],
+         U = painrelief.inla$summary.fixed[c(2:8),5])
+```
+
+为了更好地理解影响的重要性，我们生成了不同疼痛水平的后验均值估计和95%可信水平的图。水平线是疼痛级别1的参考线，它被设置为0。疼痛程度越高，受试者的疼痛缓解评分就越高(疼痛程度4除外)。显然，疼痛程度是模型中需要考虑的一个显著的混杂因素。
+
+```{r}
+p1 <- ggplot(est1, aes(x = x, y = Estimate)) + geom_point(size = 5) + geom_errorbar(aes(ymax = U, ymin = L),size=1) + geom_hline(yintercept=0, size=1.5, col="black") + xlab("Pain Level")
+p1
+```
+
+
+
+# 6. Ridge regression
+
+**法国经济进口活动有关数据**：因变量为`进口(import)`、`国内生产(DOPROD)`、`股票形式(stock)`和`国内消费(CONSUM)`。
+
+
+- 样本相关性
+
+```{r}
+data(frencheconomy, package = "brinla")
+head(frencheconomy)
+knitr::kable(round(cor(frencheconomy[,-1]),4), caption = '
+	frencheconomy数据', align='c')
+```
+
+- 数据标准化
+
+贝叶斯岭回归假设所有预测因子的系数元素($\beta_1,\dots,\beta_p$)都是从一个标准正态密度中提取的。
+
+```{r}
+fe.scaled <- cbind(frencheconomy[, 1:2], scale(frencheconomy[, c(-1,-2)]))
+```
+
+
+
+
+```{r}
+# set priors
+n <- nrow(frencheconomy)
+
+fe.scaled$beta1 <- rep(1,n)
+fe.scaled$beta2 <- rep(2,n)
+fe.scaled$beta3 <- rep(3,n)
+```
+
+对于岭回归，参数的先验有一个共同的未知方差，要实现这一点，我们必须使用副本，并改变数据集
+
+```{r}
+# this is the prior for the precision of beta
+param.beta = list(prec = list(param = c(1.0e-3, 1.0e-3)))
+
+formula.ridge  = IMPORT ~ f(beta1, DOPROD, model="iid", values = c(1,2,3), hyper = param.beta) + 
+	f(beta2, STOCK, copy="beta1", fixed=T) + f(beta3, CONSUM, copy="beta1", fixed=T)
+frencheconomy.ridge <- inla(formula.ridge, data=fe.scaled)
+ridge.est <- rbind(frencheconomy.ridge$summary.fixed, frencheconomy.ridge$summary.random$beta1[,-1]) 
+
+knitr::kable(round(ridge.est,4))
+```
+
+
+- Comparing with Standard Bayesian Linear regression
+
+```{r}
+formula <- IMPORT ~  DOPROD + STOCK + CONSUM
+frencheconomy.inla <- inla(formula, data = fe.scaled, control.fixed = list(prec = 1.0e-3), control.family = list(hyper = param.beta))
+knitr::kable(round(frencheconomy.inla$summary.fixed, 4))
+```
+
+- Comparing with Ridge regression frequentist approach
+
+```{r}
+reg2 <- lm.ridge(IMPORT ~  DOPROD + STOCK + CONSUM, data = fe.scaled, lambda = seq(0, 1, length=100))
+
+reg2.final <- lm.ridge(IMPORT ~  DOPROD + STOCK + CONSUM, data = fe.scaled, lambda = reg2$kHKB)
+reg2.final
+```
+
+# 7. Linear regression with autoregressive errors
+
+**时间序列数据**：新西兰的失业数据包括青年(15-19岁)和成人(19岁以上)的季度失业率。
+
+自2008年6月起，新西兰政府废除了《最低工资法》。在此，我们想研究在该法案废除之前和之后，成年人和年轻人失业率之间的关系。
+```{r}
+# Read the data
+data(nzunemploy, package = "brinla")
+nzunemploy$time <- 1:nrow(nzunemploy)
+```
+
+绘制成人和青年的时间序列数据
+```{r}
+#library(tidyr)
+qplot(time, value, data = gather(nzunemploy[,c(2,3,5)], variable, value, -time), geom = "line") + geom_vline(xintercept = 90) + facet_grid(variable ~ ., scale = "free") + ylab("Unemployment rate") + theme_bw()
+```
+
+为了使系数更容易理解，我们将成人失业率集中在时间序列的平均值上。
+
+```{r}
+# Centering predictor
+nzunemploy$centeredadult = with(nzunemploy, adult - mean(adult))
+```
+
+
+- 拟合一个具有独立误差的标准线性回归
+
+```{r}
+formula1 <- youth ~ centeredadult*policy
+nzunemploy.inla1 <- inla(formula1, data= nzunemploy)
+# summary(nzunemploy.inla1)
+round(nzunemploy.inla1$summary.fixed, 4)
+# Plot the Bayesian residuals
+par(mfrow=c(1,1))
+nzunemploy.res1 <- bri.lmresid.plot(nzunemploy.inla1, type="o")
+```
+
+它们之间存在一定程度的自相关。
+```{r}
+# Plot the autocorrelation and partial autocorrelation
+par(mfrow = c(2,1))
+acf(nzunemploy.res1$resid, main = "")
+acf(nzunemploy.res1$resid, type = "partial", main="")
+```
+
+图上的虚线对应95%置信带。自相关函数的形式呈指数衰减，而偏自相关函数的形式在滞后1处有很高的峰值。这些表明AR(1)过程将适合于回归模型中的误差项。
+
+
+- 拟合一个有AR(1)误差的线性回归
+
+```{r}
+formula2 <- youth ~ centeredadult*policy + f(time, model = "ar1")
+nzunemploy.inla2 <- inla(formula2, data = nzunemploy, control.family = list(hyper = list(prec = list(initial = 15, fixed = TRUE))))
+# summary(nzunemploy.inla2)
+knitr::kable(round(nzunemploy.inla2$summary.fixed, 4))
+knitr::kable(round(nzunemploy.inla2$summary.hyperpar, 4))
+```
+
+注意，回归模型的精度prec固定在$\tau = \exp(15)$
+
+
+- 与频率派方法进行比对
+```{r}
+#library(nlme)
+nzunemploy.gls <- gls(youth ~ centeredadult*policy, correlation = corAR1(form=~1), data = nzunemploy)
+summary(nzunemploy.gls)
+```  
+
+```{r}
+# plot the fitted lines
+ggplot(nzunemploy, aes(centeredadult, youth)) + geom_point(aes(shape = factor(policy)), size = 3) + geom_abline(intercept = nzunemploy.inla2$summary.fixed$mean[1], slope = nzunemploy.inla2$summary.fixed$mean[2]) + geom_abline(intercept = nzunemploy.inla2$summary.fixed$mean[1] + nzunemploy.inla2$summary.fixed$mean[3], slope = nzunemploy.inla2$summary.fixed$mean[2] + nzunemploy.inla2$summary.fixed$mean[4]) + theme_bw()
+```
+
+
