@@ -4,7 +4,7 @@
 
 感兴趣方向包括：深度学习；INLA方法；R语言；python
 
-- 贝叶斯线性回归，
+- 贝叶斯线性回归[2020.11.12Bayesian Linear Regression]
 
 包含：课件（pdf+letax版本）及R代码实现（rmarkdown格式+html格式）
 
