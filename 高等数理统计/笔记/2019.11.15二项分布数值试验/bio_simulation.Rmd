@@ -1,0 +1,112 @@
+---
+title: "二项分布的参数模拟"
+author:
+  - 庄亮亮
+documentclass: ctexart
+output:
+  rticles::ctex:
+    fig_caption: no
+    number_sections: no
+    toc: no
+classoption: "hyperref,"
+---
+
+
+## Generating random Numbers
+
+```{r}
+set.seed(0)
+binom = function(n,p,a=1.96){
+  #n为随机产生的个数，p为预先生成随机数的参数,
+  result = list()
+  x = rbinom(n,1,p)
+  mean = mean(x)
+  result$mean = mean 
+  var   = var(x)*n/(n-1)
+  result$var = var 
+  up   = mean + a*sqrt(var/n)
+  low  = mean - a*sqrt(var/n)
+  result$conf.int =c(low,up)
+  return(result)
+}
+
+```
+```{r include=FALSE}
+
+a1 = binom(10,0.5)
+a2 = binom(50,0.5)
+a3 = binom(100,0.5)
+a4 = binom(500,0.5)
+a5 = binom(1000,0.5)
+a6 = binom(5000,0.5)
+a7 = binom(10000,0.5)
+```
+
+
+
+
+## Simulation
+
+- 当**p=0.5**，计算根据不同试验次数所对应的p的估计值
+
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  a1$mean`  | `r abs( a1$mean-0.5)` |`r a1$conf.int` |
+| 50 |`r  a2$mean`  |  `r abs(a2$mean-0.5)`|`r a2$conf.int`| 
+| 100 |`r a3$mean`| `r abs( a3$mean-0.5)` |`r a3$conf.int` |
+| 500 |`r a4$mean`|  `r abs(a4$mean-0.5)`|`r a4$conf.int`| 
+| 1000 |`r a5$mean`| `r abs(a5$mean-0.5)` |`r a5$conf.int` |
+| 5000 |`r a6$mean`|  `r abs( a6$mean-0.5)`|`r a6$conf.int`| 
+| 10000 |`r a7$mean`| `r abs( a7$mean-0.5)` |`r a7$conf.int` |
+
+
+
+- 当**p=0.25**，计算根据不同试验次数所对应的p的估计值
+
+```{r include=FALSE}
+b1 = binom(10,0.25)
+b2 = binom(50,0.25)
+b3 = binom(100,0.25)
+b4 = binom(500,0.25)
+b5 = binom(1000,0.25)
+b6 = binom(5000,0.25)
+b7 = binom(10000,0.25)
+```
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  b1$mean`  | `r abs( b1$mean-0.25)` |`r b1$conf.int` |
+| 50 |`r  b2$mean`  |  `r abs(b2$mean-0.25)`|`r b2$conf.int`| 
+| 100 |`r b3$mean`| `r abs( b3$mean-0.25)` |`r b3$conf.int` |
+| 500 |`r b4$mean`|  `r abs(b4$mean-0.25)`|`r b4$conf.int`| 
+| 1000 |`r b5$mean`| `r abs(b5$mean-0.25)` |`r b5$conf.int` |
+| 5000 |`r b6$mean`|  `r abs( b6$mean-0.25)`|`r b6$conf.int`| 
+| 10000 |`r b7$mean`| `r abs( b7$mean-0.25)` |`r b7$conf.int` |
+
+- 当**p=0.75**，计算根据不同试验次数所对应的p的估计值
+```{r include=FALSE}
+b1 = binom(10,0.75)
+b2 = binom(50,0.75)
+b3 = binom(100,0.75)
+b4 = binom(500,0.75)
+b5 = binom(1000,0.75)
+b6 = binom(5000,0.75)
+b7 = binom(10000,0.75)
+```
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  b1$mean`  | `r abs( b1$mean-0.75)` |`r b1$conf.int` |
+| 50 |`r  b2$mean`  |  `r abs(b2$mean-0.75)`|`r b2$conf.int`| 
+| 100 |`r b3$mean`| `r abs( b3$mean-0.75)` |`r b3$conf.int` |
+| 500 |`r b4$mean`|  `r abs(b4$mean-0.75)`|`r b4$conf.int`| 
+| 1000 |`r b5$mean`| `r abs(b5$mean-0.75)` |`r b5$conf.int` |
+| 5000 |`r b6$mean`|  `r abs( b6$mean-0.75)`|`r b6$conf.int`| 
+| 10000 |`r b7$mean`| `r abs( b7$mean-0.75)` |`r b7$conf.int` |
+
+## Conclusion
+
+可以看到不管p为何值，随着n不断变大，p估计值与实际参数之间的偏差在不断减小，区间估计效果越来越好。
+
+

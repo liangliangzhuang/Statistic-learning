@@ -1,0 +1,653 @@
+---
+title: "高等数理统计"
+author:
+  - 庄亮亮
+documentclass: ctexart
+output:
+  rticles::ctex:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+classoption: "hyperref,"
+---
+
+# 基本概念
+## 统计结构
+## 常用分布族
+
+### Gamma分布族
+
+The gamma distribution is a flexible distribution that may offer a good fit to some sets of life data. Sometimes called the Erlang distribution, the gamma distribution has applications in Bayesian analysis as a prior distribution, and it is also commonly used in queueing theory.
+
+The pdf of the gamma distribution is given by:
+
+- 图像性质
+- **概率密度函数**
+```{r}
+set.seed(1)
+x <- seq(0,5,by=0.1)
+y <- dgamma(x,1,2)
+plot(x, y, main="the Gamma Density Distribution",xlim = c(0,4),
+     ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dgamma(x,0.5,2),col = "green" )
+lines(x,dgamma(x,1.7,2),col = "black" )
+lines(x,dgamma(x,3,2),col = "blue" )
+legend("topright",legend = paste("shape = ",c(1,0.5,1.7,3),"scale = ",c(2,2,2,2)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+- **分布函数**
+```{r}
+set.seed(1)
+x <- seq(0,10,by=0.1)
+y <- pgamma(x,1,2)
+plot(x, y, main="the Gamma Cumulative Distribution",xlim = c(0,3),
+     ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dgamma(x,0.5,2),col = "green" )
+lines(x,dgamma(x,1.7,2),col = "black" )
+lines(x,dgamma(x,3,2),col = "blue" )
+legend("topright",legend = paste("shape = ",c(1,0.5,1.7,3),"scale = ",c(2,2,2,2)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+
+### Beta分布族
+
+- 图像性质
+```{r}
+set.seed(1)
+x <- seq(0,5,by=0.1)
+y <- dbeta(x,2,2)
+plot(x, y, main="the Beta Density Distribution",xlim = c(0,1),
+     ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dbeta(x,0.5,0.5),col = "green" )
+lines(x,dbeta(x,1.7,2),col = "black" )
+lines(x,dbeta(x,1,1),col = "blue" )
+legend("topright",legend = paste("shape = ",c(2,0.5,1.7,1),"scale = ",c(2,0.5,2,1)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+
+
+
+## 统计量及其分布
+ 
+ 在知道可测空间情况下，用什么分布P我们不清楚。得从样本空间中抽取样本，通过样本信息对总体分布进行推断。所以我们要引进统计量的概念
+ 
+### 统计量
+   
+   **统计量**：不依赖于参数$\theta$的可测映照$T$（样本均值、样本方差、样本偏度、样本峰度）
+
+### 抽样分布
+
+   **抽样分布**：统计量的分布。
+   
+   R.A.Fisher:抽样分布、参数估计、假设检验称为统计推断的三个中心内容。
+   
+   （1）$T$为一维统计量；
+   
+   （2）$T$维k维统计量； 
+   
+   （3）$T$维n维统计量； 
+   
+   （4）$T$为$R^n$的仿射变换。
+   
+   设 $T =AX + C$为$R^n$上的仿射变换。则$T$的概率密度为
+   
+   $$p_{T}(t) = p_{X}((A^{-1}(t - C))/|det A|$$
+   
+### 来自正态总体的抽样分布
+
+ 这节是上一节的一个特殊情况，在基于正态总体的情况下来研究抽样分布。因为可以根据大样本理论，中心极限定理，当$n \rightarrow \infty$时，总体渐近服从正态分布。所以要针对性的研究。
+ 
+ 主要有：$\chi^2$分布、$F$分布和$t$分布。
+ 
+ 与本科所学的不同的是，加入了非中心参数，形式更加复杂。
+ 
+
+### 次序统计量及其分布
+
+  次序统计量是统计中比较常用的统计量。
+  
+  它是将样本数据按照从小到大的顺序进行排列。用的比较多的是:最大次序统计量$x_{(n)}$，最小次序统计量 $x_{(1)}$，中位数统计量$m_{0.5}$。
+  
+  书上从广义出发，探讨了三种可能，并讨论了矩的存在性
+  
+(1)$X_{k}$的密度函数，其中$1 \leq K \leq N$,$X_{k}$的观察值为$y_{k}$
+
+其中， $x_{(1)},x_{(n)}$的密度函数为
+
+$$g(y_{1}) = n{[1 - F(y_{1})]}^{n-1}p(y_{1})$$
+
+$$g(y_{n}) = n{[F(y_{n})]}^{n-1}p(y_{n})$$
+
+ (2)$X_{(k)},X_{(j)}$的联合密度函数
+ 
+ (3)前r个次序统计量的联合密度函数
+ 
+ (4)统计量的矩的存在性
+
+## 统计量的近似分布
+
+### 从中心极限定理获得渐近分布
+
+### 随机变量序列的两种收敛性
+
+**依概率收敛**：
+$$P(|Z_{n}- Z|\geq \varepsilon)\rightarrow 0 ,n\rightarrow \infty$$
+
+记为$Z_{n}\xrightarrow{P} Z$
+
+**依分布收敛**：
+$$F_{n}(x) \rightarrow F(x),n\rightarrow \infty$$
+
+记为$Z_{n}\xrightarrow{L} Z$
+
+- 设$Z_{n}\xrightarrow{P} Z$，则$Z_{n}\xrightarrow{L} Z$
+  
+  但注意的是，逆命题不成立。
+  
+- 当Z为常数时，两种收敛性相互等价
+
+设$Z_{n}\xrightarrow{L} Z$，则$Z_{n}\xrightarrow{P} Z$
+
+### 几个重要的结果 
+
+- **(Slutsky定理)**
+
+设$\{a_{n}\}$为一趋于$\infty$的数列，b为常数，并且对随机变量序列$\{Z_{n}\}$有
+$$a_{n} (Z_{n} - b)\xrightarrow{L} Z$$
+又设$g(.)$为可微函数，且$g'$在点b处连续，则有
+$$a_{n}[ g(Z_{n}) - g(b)]\xrightarrow{L} g'(b)Z$$
+
+
+### 样本的p分位数及其渐近分布
+
+- **总体的p分位数**
+
+  1.$F(X) = p$的解 $x=\xi_{p}$称为总体p分位数。但容易出现3中问题
+  
+  (1)唯一的p分位数 (2)没有p分位数 (3)不止一个p分位数
+  
+  2.**(常用)**
+  $$\xi_{p}= \inf \{ x: F(x) \geq p \}$$
+  定义为：首次满足自变量的取值
+  
+- **样本的p分位数**
+   
+   样本的p分位数的定义也有三种不同的给定方式。但是综合来说，值的误差不会超过1，影响不大。
+
+- **样本分位数的渐近分布**
+
+$$\frac{\sqrt{n}(X_{k} - \xi_{p})}     {  {\sqrt{p(1-p)}/{p(\xi_{p})}}  }\xrightarrow{L} N(0,1)$$
+其中，注意$p \in (0,1)$ ,$\xi_{p}$需要通过带到分布函数在计算得到。$p(\xi_{p})$将$\xi_{p}$代入密度函数中得到的概率。
+或者写成
+
+$${\sqrt{n}(X_{k} - \xi_{p})} \xrightarrow{L}   N(  0, \frac{p(1-p)}{{p(\xi_{p})}^2} )$$
+
+
+### 矩的近似
+
+
+## 充分统计量
+
+**充分统计量**：在统计中把不损失信息的统计量称为充分统计量
+
+**证明充分统计量的办法：**
+
+1. 利用定义： $T$为充分统计量的充要条件是
+$$p_{\theta}(x_{1},\cdots,x_{n}|t) = p(x_{1},\cdots,x_{n}|t)$$
+
+其中，$p_{\theta}(x_{1},\cdots,x_{n}|t)$是在给定$T=t$下，$(X_{1},\cdots,X_{n})$的联合条件密度函数。
+
+2. 利用定理：次序统计量为分布族的充分统计量
+
+3. 因子分解定理（详细定义见书上P57）  **常用**
+$$p_{\theta}(x) = g_{\theta}(T(x))h(x)$$
+
+其中，$p_{\theta}(x)$为联合密度函数
+
+- **例：** $X = (X_{1},\cdots,x_{n})$来自 Poisson分布$P(\lambda)$的一个样本。
+
+样本联合密度函数为：
+
+$$P(X = (X_{1},\cdots,x_{n})) = \lambda^{\sum_{i=1}^{n}x_{i}} e^{-n\lambda} / \prod_{i=1}^{n}(x_{i}!)$$
+
+取$T(x) = {\sum_{i=1}^{n}x_{i}}, h(x) = (\prod_{i=1}^{n}(x_{i}!))^{-1}$则可以改写为
+$$P(X=x) = [\lambda ^{T(x)}e^{-n\lambda}]h(x)$$
+
+由因子分解定理知，$T(x) = {\sum_{i=1}^{n}x_{i}}$是$\lambda$的充分统计量。
+
+由于一个分布族的充分统计量可能有很多个，而我们想找最小的充分统计量。
+
+- **常用的充分统计量都是最小充分统计量，它们常可以用因子分解定理求出。**
+
+## 完备性
+
+当我们用统计量估计某个未知参数时，如果这个估计一定准则下唯一，则有一定的帮助。
+
+**定义：**
+$$E_{\theta}\phi(x) = 0 \quad \Rightarrow \quad  \phi(x) = 0 $$ 
+
+则分布族是完备的。
+
+**存在问题：** 拉氏变换是什么？
+
+## 指数结构
+
+### 定义与例子
+**定义：** 密度函数可表示为以下形式：
+$$p_{\theta}(x) = c(\theta) \exp \left\{\sum_{j=1}^{k}c_{j}(\theta)T_{j}(x)\right\}h(x)$$
+并且他的支撑集$\{x:p_{\theta} > 0\}$
+不依赖于$\theta$。则称该结构为指数型统计结构。分布族称为指数分布族。
+
+*注：*二项分布族、正态分布族、Gamma分布族都是指数型分布族
+
+### 指数型分布族标准形式
+令$\omega_{j} = c_{j}\theta , j=1,\dots,k$，并可解出$\theta$，再令$c^{*}(\omega) = c(\theta(\omega))$
+$$p_{w}(x) = c^{*}(\omega) \exp \left\{\sum_{j=1}^{k} \omega_{j}T_{j}(x) \right\}h(x)$$
+
+### 指数型分布族的基本性质
+
+1. 自然参数空间$\Omega$为凸集
+
+2. 若$X$为指数型分布标准形式，则有
+
+统计量$\left(T_{1}(X),\cdots,T_{k}(X) \right) = \left(\sum_{i=1}^{n} T_{1}(x_{i}),\cdots,\sum_{i=1}^{n} T_{k}(x_{i}) \right)$是充分统计量。
+
+充分统计量的期望和协方差分别为：
+
+$$E_{\omega}(T_{j}(X)) = - \frac{\partial ln c(\omega)}{\partial \omega_{j}}$$
+$$Cov_{\omega}(T_{i}(X),T_{j}(X)) = - \frac{\partial^{2} ln c(\omega)}{\partial \omega_{i} \partial \omega_{j}}$$
+其中$c(\omega) = {\left[c^{*}(\omega) \right]}^{n}$
+
+3. 假如$\Omega$有内点，则统计量$\left(T_{1}(X),\cdots,T_{k}(X) \right)$完备统计量。
+
+\newpage
+
+# 点估计
+
+我们比较感兴趣的是： 通过抽样方法从总体中得到的样本服从什么分布（即：从样本推断总体分布或其他特征参数）
+
+统计推断可分为三个方面：**抽样分布，参数估计，假设检验**。
+
+本章主要讲参数估计中的**点估计**（矩估计、极大似然估计、最小二乘估计）
+
+## 估计与优良性
+
+### **均方误差**
+$$MSE_{\theta}(\hat{\theta}) = E{(\hat{\theta(X) - \theta})}^2$$
+取最小的均方误差，但是实际上这样的$\theta$不存在。所以我们采取其他方法，先对估计提出一些合理性要求，让不合理估计排除在外。
+
+### 无偏性
+$$MSE_{\theta}(\hat{\theta}) = Var(\hat{\theta}) + {(E (\hat{\theta}) - \theta)}^2$$
+使得偏差$E (\hat{\theta}) - \theta$为零，则$\hat{\theta}$为$\theta$的无偏估计。
+
+### 相合性
+$$\hat{\theta_{n}} \xrightarrow{P} \theta$$
+**计算技巧**：
+
+  1. 利用切比雪夫定理：
+$$P(|X-E(X)|\geq \varepsilon ) \leq \frac{D(X)}{\varepsilon^2} \rightarrow 0$$
+  2. 利用概率分布,定义直接算
+  $$P(|X_{n}-\theta|\geq \varepsilon ) = P(X_{n}\leq \theta - \varepsilon) = \int_{0}^{\theta - \varepsilon} p.d.f. dt \rightarrow 0$$
+  
+### **渐近正态性**
+$$(\hat{\theta}-\theta)/\sigma_{n}(\theta) \xrightarrow{L} N(0,1)$$
+则称$\hat{\theta_{n}}$是$\theta$的渐进正态估计，$\sigma_{n}(\theta)$为渐近方差，记$\hat{\theta_{n}} \sim AN(\theta,{\sigma}^2_{n}(\theta))$
+
+- **相对渐近效**
+$$e(\theta,\hat{\theta}_{n},\tilde{\theta}_{n}) = \lim_{n \rightarrow \infty} \frac{\sigma^{2}_{2n}}{\sigma^{2}_{1n}}$$
+其中，$\sigma^{2}_{2n},\sigma^{2}_{1n}$为两个渐近正态估计。
+
+**注：** 渐近正态估计的渐近方差往往具有$\frac{1}{n}$的阶。因为是抽样过来的。渐近正态性的估计的优良性质，但我们注意到，估计的渐近正态性只是反映了$n\rightarrow\infty$时估计的性质。它并不能说明为达到所需要的精度样本容量必须为多大才行。
+
+**解题技巧：** 利用中心极限定理，再用$slutsky$公式。求某$g(x)$的渐近分布。（课件课后习题）
+
+
+## 无偏估计
+
+### **无偏性**
+
+  1. 无偏估计不一定存在
+  
+  2. 对可估参数，无偏估计一般不唯一
+  
+  3. 无偏估计不一定时好估计
+  
+### 一致最小方差无偏估计$UMVUE$
+
+简单的说就是：把所有无偏估计找出来，找方差最小的无偏估计。
+
+**寻找UMVUE的方法**
+
+  1. 寻找完备充分统计量的函数使之成为$\theta$的无偏估计。
+
+  2. 完备充分统计量的条件期望（难！！！！）
+  
+  $T(X)=E(\varphi(X)|S(X))$,$S(X)$是分布族的完备充分统计量，$\varphi(X)$是$g(\theta)$的无偏估计，则$T(X)$是$g(\theta)$的$UMVUE$
+  
+### **$U$统计量**
+
+  $U$统计量具有很好大样本性质，比如强相合性和渐近正态性，这使得统计量在非参数统计推断中起到很大作用。
+  
+## 信息不等式
+
+### [$Fisher$信息量](https://baike.baidu.com/item/%E8%B4%B9%E5%B8%8C%E5%B0%94%E4%BF%A1%E6%81%AF/22742376)
+
+- 存在性问题：
+  
+  $Cramer-Rao$正则族中$Fisher$信息存在。
+  
+  指数族为 $Cramer-Rao$正则族。
+
+- 计算方式：
+$$I_{ij} = -E_{\theta}\left\{ \frac{\partial^2 ln p_{\theta}(x)}{\partial \theta_{i} \partial \theta_{j}}\right\}$$
+其中，$p_{\theta} = \prod_{i=1}^{n}p(x_{i})$，基本上是1、2个参数。**负的二阶导的期望**
+
+*注：* 对重复抽样结构而言，$I_{n}(\theta) = nI_{1}(\theta)$
+
+### Fisher信息与充分统计量
+
+- **两性质**
+$$I_{T}(\theta) \leq I(\theta)$$
+当$T(x)$是充分统计量时，
+$$I_{T}(\theta) = I(\theta)$$
+
+### 信息不等式($Cramer-Rao$不等式)
+
+用$Fisher$信息表示无偏估计的方差下限的不等式。
+
+记$\triangle = \frac{d}{d\theta} g(\theta)$
+$$Var_{\theta}(T(x)) \geq \triangle I^{-1}(\theta) \triangle'$$
+其中，$\triangle I^{-1}(\theta) \triangle'$为$g(\theta)$的无偏估计协差阵的下界，简称C-R下界。
+
+当为一维时，简化公式：
+$$Var_{\theta}(T(x)) \geq {( \frac {\partial g(\theta)}{\partial \theta})}^2 / I(\theta)$$
+重复结构$I(\theta) = nI_{1}(\theta)$
+
+*注：* 1. 无偏估计额方差达到了C-R下界，那么它是UMVUE。
+
+2. 不是所有一致最小无偏估计都是。
+       
+### 有效无偏估计
+
+$${(g'(\theta))}^2 I^{-1}(\theta)/Var(T(x))$$
+为估计$T(x)$的效，如果效等于1，则称$T(x)$为$g(\theta)$的有效无偏估计。
+
+## 矩估计与替换方法
+
+### 矩估计
+**基本思路：** 用样本矩及其函数估计相应的总体矩及其函数。
+
+### 矩估计的特点
+
+1. 基于经验分布函数，而其前提条件时样本量较大；
+
+2. 没有用到总体分布的任何信息，本质上说是一种非参数方法。它是UMVUE。
+
+### 频率替换估计
+
+
+## 极大似然估计
+
+### 定义与例子
+
+**主要思想：**  当样本$x$给定后，可考虑对不同的$\theta$，概率密度如何变化，它反映了对$x$的解释能力，这就是似然。
+
+**步骤** 
+
+1. 联合密度函数 $L = \prod_{i=1}^{n} p_{\theta}(x_{i})$；
+
+2. 对其求导 $l = \sum_{i=1}^{n} \log p_{\theta}(x_{i})$；
+
+3. 分别对不同的参数求偏导。
+
+### 相合性和渐近正态性
+$$\sqrt{n} (\hat{\theta}_{n} - \theta_{0}) \xrightarrow{L} N(0, I^{-1}(\theta_{0}))$$
+
+### 渐近有效性
+
+$$e(\theta,T_{n}) = \frac{{[g'(\theta)}^2/I(\theta)]}{\sigma^2(\theta)}$$
+
+### 局限性
+
+## 最小二乘估计
+
+## 同变估计
+
+## 稳健估计
+
+\newpage
+# 假设检验
+## 基本概念
+
+
+## $Neyman-Pearson$基本引理
+## 一致最优势检验
+### 一致最优势检验（$UMPT$）
+
+- 高等数理统计上了假设检验中的**最优势检验(MPT)**以及**一致最优势检验（UMPT）**。并证明了在一定的条件下
+
+（1）$MPT$不依赖于备择假设的具体数值，则可扩大备择假设
+
+（2）当势函数时单调函数时，可扩大原假设）
+
+可由$MPT$获得$UMPT$，具有实操性。
+
+- $MPT$适用于最简单的假设检验，类似于：$H_{0}: \mu=\mu_{0},H_{1}: \mu=\mu_{1}$。
+
+- $UMPT$适用于更加复杂的假设检验，类似于：$H_{0}: \mu<\mu_{0},H_{1}: \mu \geq \mu_{1}$等。
+
+- 一般情况下$MPT$的势函数$(\phi(x))$依赖于备择假设中的$\theta$值，则$UMPT$不一定存在。在以下情况可能存在。
+
+在此基础上，我们引进**单调似然比**和**单参数指数型分布族**。
+
+   1.$H_{0}: \theta \leq \theta_{0},H_{1}: \theta > \theta_{1}$
+   
+   2.$H_{0}: \theta \geq \theta_{0},H_{1}: \theta < \theta_{1}$
+   
+   3.$H_{0}: \theta = \theta_{0},H_{1}: \theta \neq \theta_{1}$
+   
+   4.$H_{0}: \theta_{1} \leq \theta \leq \theta_{2}, H_{1}: \theta < \theta_{1} or \theta > \theta_{2}$
+   
+   5.$H_{0}: \theta \leq \theta_{1} or \theta \geq \theta_{2}, H_{1}:  \theta_{1} < \theta < \theta_{2}$
+
+- 其中1，2，5的$UMPT$存在；3，4的$UMPT$不存在。(就得用之后的一致最优势无偏检验)
+
+- 对于3，要满足$E_{\theta_{0}}(T(x)\varphi(T(x))) = \alpha E_{\theta_{0}}(T(x))$
+
+- 对于4，要满足$E_{\theta_{1}}(\varphi(x)) = E_{\theta_{2}}(\varphi(x))$
+
+**做题套路**
+
+1. 判断该问题属于那类问题（UMPT[1,2,5]?UMPUT[3,4]?）
+
+2. 计算似然比（联合密度函数），判断$Q(\theta)$单调情况，$T(x)$，写出拒绝域。
+
+3. 最后计算出相应的c （对于问题3，4，注意满足条件不同）
+
+4. 写出UMPT[1,2,5]或UMPUT[3,4]
+
+### **单调似然比（MLR）** 
+
+定义：
+
+  1.$\Theta$ 是实直线上的一个区间
+  
+  2.概率分布$P_{\theta_{1}}$与$P_{\theta_{2}}$不同
+  
+  3.似然比$\lambda(x)=\frac{p(x;\theta_{2})}{p(x;\theta_{1})}$是$T(x)$的非降函数（或非增函数） 
+
+
+### **单参数指数型分布族** ： 
+
+$$p(x;\theta) = c(\theta) \cdot \exp\{Q(\theta)T(x)\}\cdot h(x) $$ 
+
+其中，$Q(\theta)$为严增或严减函数。
+
+- 其中，二项分布族，负二项分布族，$Poisson$分布族，正态分布族（均值已知，方差未知或均值未知方差已知）等它们关于其充分统计量$T(x)$都具有$MLR$。
+
+
+
+
+
+
+\newpage
+# 自己做的project
+
+
+## KS-检验（Kolmogorov-Smirnov test）
+**检验数据是否符合某种分布**
+
+*KS*是比较一个频率分布$f(x)$与理论分布$g(x)$或者两个观测值分布的检验方法。
+其原假设H0:两个数据分布一致或者数据符合理论分布。
+$D=max|f(x)- g(x)|$，当实际观测值$D>D(n,α)$则拒绝$H_{0}$，否则则接受$H_{0}$假设。
+$KS检验$与$t-检验$之类的其他方法不同是：
+
+  - $KS检验$不需要知道数据的分布情况，可以算是一种非参数检验方法。
+  - $KS检验$的灵敏度没有相应的检验来的高。在样本量比较小的时候。
+  - $KS检验$最为非参数检验在分析两组数据之间是否不同时相当常用。
+
+**PS**：$t-检验$的假设是检验的数据满足正态分布，否则对于小样本不满足正态分布的数据用$t-检验$就会造成较大的偏差，虽然对于大样本不满足正态分布的数据而言$t-检验$还是相当精确有效的手段。
+
+
+参考资料 <https://www.cnblogs.com/arkenstone/p/5496761.html>.
+
+
+1. R语言实现
+
+检验指定的数列是否服从正态分布
+```{r}
+ks.test(rnorm(100),"pnorm")
+```
+p值为0.5093大于0.05接受原假设，故该总体服从正态分布。
+
+检验指定的两个数列是否服从相同分布
+```{r}
+ks.test(rnorm(100),rnorm(50))
+```
+p值为0.6137>0.05接受原假设，故两总体服从相同分布。
+
+2.python语言实现
+
+**加载相关包**
+```{python }
+from scipy.stats import kstest
+import numpy as np
+```
+检验指定的数列是否服从正态分布
+```{python}
+x = np.random.normal(0,1,1000)
+test_stat = kstest(x, 'norm')
+print(test_stat)
+```
+可得p值为0.7>0.05接受原假设，故该分布服从正态分布，
+
+检验指定的两个数列是否服从相同分布
+
+```{python}
+from scipy.stats import ks_2samp
+beta=np.random.beta(7,5,1000)
+norm=np.random.normal(0,1,1000)
+ks_2samp(beta,norm)
+```
+可得p值为很小，故拒绝原假设，两分布不是相同的分布。
+
+
+## 二项分布点估计与区间估计
+
+
+1. 产生数据
+
+```{r}
+set.seed(0)
+binom = function(n,p,a=1.96){
+  #n为随机产生的个数，p为预先生成随机数的参数,
+  result = list()
+  x = rbinom(n,1,p)
+  mean = mean(x)
+  result$mean = mean 
+  var   = var(x)*n/(n-1)
+  result$var = var 
+  up   = mean + a*sqrt(var/n)
+  low  = mean - a*sqrt(var/n)
+  result$conf.int =c(low,up)
+  return(result)
+}
+
+```
+```{r include=FALSE}
+
+a1 = binom(10,0.5)
+a2 = binom(50,0.5)
+a3 = binom(100,0.5)
+a4 = binom(500,0.5)
+a5 = binom(1000,0.5)
+a6 = binom(5000,0.5)
+a7 = binom(10000,0.5)
+```
+
+\newpage
+- 当**p=0.5**，计算根据不同试验次数所对应的p的估计值
+
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  a1$mean`  | `r abs( a1$mean-0.5)` |`r a1$conf.int` |
+| 50 |`r  a2$mean`  |  `r abs(a2$mean-0.5)`|`r a2$conf.int`| 
+| 100 |`r a3$mean`| `r abs( a3$mean-0.5)` |`r a3$conf.int` |
+| 500 |`r a4$mean`|  `r abs(a4$mean-0.5)`|`r a4$conf.int`| 
+| 1000 |`r a5$mean`| `r abs(a5$mean-0.5)` |`r a5$conf.int` |
+| 5000 |`r a6$mean`|  `r abs( a6$mean-0.5)`|`r a6$conf.int`| 
+| 10000 |`r a7$mean`| `r abs( a7$mean-0.5)` |`r a7$conf.int` |
+
+
+
+- 当**p=0.25**，计算根据不同试验次数所对应的p的估计值
+
+```{r include=FALSE}
+b1 = binom(10,0.25)
+b2 = binom(50,0.25)
+b3 = binom(100,0.25)
+b4 = binom(500,0.25)
+b5 = binom(1000,0.25)
+b6 = binom(5000,0.25)
+b7 = binom(10000,0.25)
+```
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  b1$mean`  | `r abs( b1$mean-0.25)` |`r b1$conf.int` |
+| 50 |`r  b2$mean`  |  `r abs(b2$mean-0.25)`|`r b2$conf.int`| 
+| 100 |`r b3$mean`| `r abs( b3$mean-0.25)` |`r b3$conf.int` |
+| 500 |`r b4$mean`|  `r abs(b4$mean-0.25)`|`r b4$conf.int`| 
+| 1000 |`r b5$mean`| `r abs(b5$mean-0.25)` |`r b5$conf.int` |
+| 5000 |`r b6$mean`|  `r abs( b6$mean-0.25)`|`r b6$conf.int`| 
+| 10000 |`r b7$mean`| `r abs( b7$mean-0.25)` |`r b7$conf.int` |
+
+- 当**p=0.75**，计算根据不同试验次数所对应的p的估计值
+```{r include=FALSE}
+b1 = binom(10,0.75)
+b2 = binom(50,0.75)
+b3 = binom(100,0.75)
+b4 = binom(500,0.75)
+b5 = binom(1000,0.75)
+b6 = binom(5000,0.75)
+b7 = binom(10000,0.75)
+```
+
+|试验次数| p估计值     |偏差                      |区间估计           |
+|------|:------------|:---------------------------|:-----------------|
+| 10 |`r  b1$mean`  | `r abs( b1$mean-0.75)` |`r b1$conf.int` |
+| 50 |`r  b2$mean`  |  `r abs(b2$mean-0.75)`|`r b2$conf.int`| 
+| 100 |`r b3$mean`| `r abs( b3$mean-0.75)` |`r b3$conf.int` |
+| 500 |`r b4$mean`|  `r abs(b4$mean-0.75)`|`r b4$conf.int`| 
+| 1000 |`r b5$mean`| `r abs(b5$mean-0.75)` |`r b5$conf.int` |
+| 5000 |`r b6$mean`|  `r abs( b6$mean-0.75)`|`r b6$conf.int`| 
+| 10000 |`r b7$mean`| `r abs( b7$mean-0.75)` |`r b7$conf.int` |
+
+2. 结论
+可以看到不管p为何值，随着n不断变大，p估计值与实际参数之间的偏差在不断减小，区间估计效果越来越好。
+
+

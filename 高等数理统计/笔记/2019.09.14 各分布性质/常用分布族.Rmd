@@ -1,0 +1,67 @@
+---
+title: "常用分布族"
+author: "Z Liangliang"
+date: "2019/9/14"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Gamma分布族
+
+The gamma distribution is a flexible distribution that may offer a good fit to some sets of life data. Sometimes called the Erlang distribution, the gamma distribution has applications in Bayesian analysis as a prior distribution, and it is also commonly used in queueing theory.
+
+The pdf of the gamma distribution is given by:
+
+### 图像性质
+**概率密度函数**
+```{r}
+set.seed(1)
+x <- seq(0,5,by=0.1)
+y <- dgamma(x,1,2)
+plot(x, y, main="the Gamma Density Distribution",xlim = c(0,4),ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dgamma(x,0.5,2),col = "green" )
+lines(x,dgamma(x,1.7,2),col = "black" )
+lines(x,dgamma(x,3,2),col = "blue" )
+legend("topright",legend = paste("shape = ",c(1,0.5,1.7,3),"scale = ",c(2,2,2,2)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+**分布函数**
+```{r}
+set.seed(1)
+x <- seq(0,10,by=0.1)
+y <- pgamma(x,1,2)
+plot(x, y, main="the Gamma Cumulative Distribution",xlim = c(0,3),ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dgamma(x,0.5,2),col = "green" )
+lines(x,dgamma(x,1.7,2),col = "black" )
+lines(x,dgamma(x,3,2),col = "blue" )
+legend("topright",legend = paste("shape = ",c(1,0.5,1.7,3),"scale = ",c(2,2,2,2)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+
+## Beta分布族
+
+### 图像性质
+```{r}
+set.seed(1)
+x <- seq(0,5,by=0.1)
+y <- dbeta(x,2,2)
+plot(x, y, main="the Beta Density Distribution",xlim = c(0,1),ylim = c(0,2), col = "red", type="l", lwd=2)
+lines(x,dbeta(x,0.5,0.5),col = "green" )
+lines(x,dbeta(x,1.7,2),col = "black" )
+lines(x,dbeta(x,1,1),col = "blue" )
+legend("topright",legend = paste("shape = ",c(2,0.5,1.7,1),"scale = ",c(2,0.5,2,1)),lwd = 1, col = c("red", "green","black","blue" ))
+
+```
+
+
+
+
+

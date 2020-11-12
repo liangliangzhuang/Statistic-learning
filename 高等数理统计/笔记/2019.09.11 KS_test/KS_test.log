@@ -1,0 +1,13 @@
+
+! c:\Users\<c6><df><d0><c7><U+006C><d6><e9>\AppData\Roaming\TinyTeX\texmf-dist\scripts\texlive\fmtutil.pl: mkdir(c:/users/????/) failed for tree c:/users/????/documents/.tinytex/texmf-var/temp.64760.835596: Invalid argument at C:/Users/<c6><df><d0><c7><U+006C><d6><e9>/AppData/Roaming/TinyTeX/tlpkg/TeXLive/TLUtils.pm line 913.
+! fmtutil: fmtutil is using the following fmtutil.cnf files (in precedence order):
+! fmtutil:   c:/users/<c6><df><d0><c7><U+006C><d6><e9>/appdata/roaming/tinytex/texmf-dist/web2c/fmtutil.cnf
+! fmtutil: fmtutil is using the following fmtutil.cnf file for writing changes:
+! fmtutil:   c:/users/????/documents/.tinytex/texmf-config/web2c/fmtutil.cnf
+! ...<c6><df><d0><c7><U+006C><d6><e9>\AppData\Roaming\TinyTeX\bin\win32\runscript.tlu:902: command failed with exit code 22:
+! perl.exe c:\Users\<c6><df><d0><c7><U+006C><d6><e9>\AppData\Roaming\TinyTeX\texmf-dist\scripts\texlive\fmtutil.pl  --user --byfmt pdflatex
+! Running the command C:\Users\<c6><df><d0><c7><U+006C><d6><e9>\AppData\Roaming\TinyTeX\bin\win32\fmtutil-user.exe
+
+! kpathsea: Running mktexfmt pdflatex.fmt
+
+! The command name is C:\Users\<c6><df><d0><c7><U+006C><d6><e9>\AppData\Roaming\TinyTeX\bin\win32\mktexfmt
